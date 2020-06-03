@@ -32,6 +32,14 @@ def add_message(request, pk):
             message = Message.objects.create(user=request.user, content=content)
             thread.messages.add(message)
             json_response['created'] = True
+            if len(thread.messages.all()) is 1:
+                json_response['first'] = True
     else:
         raise Http404("Usuario no autenticado")
     return JsonResponse(json_response)
+
+@login_required
+def start_thread(request, username):
+    user =get_object_or_404(User, username=username)
+    thread = Thread.objects.find_or_create(user, request.user)
+    return redirect(reverse_lazy('messenger:detail', args=[thread.pk]))
